@@ -3,6 +3,8 @@ interface ControlsProps {
   setSides: (value: number) => void;
   friction: number;
   setFriction: (value: number) => void;
+  pointCollision: boolean;
+  setPointCollision: (value: boolean) => void;
 }
 
 export function Controls({
@@ -10,6 +12,8 @@ export function Controls({
   setSides,
   friction,
   setFriction,
+  pointCollision,
+  setPointCollision,
 }: ControlsProps) {
   return (
     <div
@@ -43,6 +47,22 @@ export function Controls({
           onChange={(e) => setFriction(Number(e.target.value))}
           style={{ width: "100%" }}
         />
+      </label>
+
+      <label
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          cursor: "pointer",
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={pointCollision}
+          onChange={(e) => setPointCollision(e.target.checked)}
+        />
+        Colisão pelo centro
       </label>
     </div>
   );

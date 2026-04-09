@@ -29,11 +29,12 @@ export function useSlingshot(
   const onMouseDown = (p5: p5Types) => {
     const bodies = bodiesRef.current.filter((b) => b.label === "ball");
     for (const body of bodies) {
+      const r = (body as any).visualRadius ?? body.circleRadius;
       const d = Math.hypot(
         p5.mouseX - body.position.x,
         p5.mouseY - body.position.y,
       );
-      if (d < body.circleRadius + 8) {
+      if (d < r + 8) {
         (body as any).isWaiting = false;
         dragRef.current = {
           body,

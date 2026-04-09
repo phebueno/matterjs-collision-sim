@@ -11,12 +11,19 @@ const HEIGHT = 600;
 interface SimulatorCanvasProps {
   sides: number;
   friction: number;
+  pointCollision: boolean;
 }
 
-export function SimulatorCanvas({ sides, friction }: SimulatorCanvasProps) {
+export function SimulatorCanvas({
+  sides,
+  friction,
+  pointCollision,
+}: SimulatorCanvasProps) {
   const engineRef = useRef<Matter.Engine | null>(null);
   const bodiesRef = useRef<Matter.Body[]>([]);
   const [, forceUpdate] = useState<number>(0);
+
+  const makeCollisionRadius = () => (pointCollision ? 4 : 18);
 
   useEffect(() => {
     const engine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
@@ -32,12 +39,19 @@ export function SimulatorCanvas({ sides, friction }: SimulatorCanvasProps) {
       });
     });
 
-    const ball = Matter.Bodies.circle(WIDTH / 2, HEIGHT / 2, 18, {
-      restitution: 1,
-      friction: 0,
-      frictionAir: 0,
-      label: "ball",
-    });
+    const ball = Matter.Bodies.circle(
+      WIDTH / 2,
+      HEIGHT / 2,
+      makeCollisionRadius(),
+      {
+        restitution: 1,
+        friction: 0,
+        frictionAir: 0,
+        label: "ball",
+      },
+    );
+    (ball as any).visualRadius = 18;
+    (ball as any).usePointStyle = pointCollision;
     Matter.Composite.add(engine.world, ball);
     bodiesRef.current = [ball];
 
@@ -63,13 +77,20 @@ export function SimulatorCanvas({ sides, friction }: SimulatorCanvasProps) {
 
   const addBall = () => {
     if (!engineRef.current) return;
-    const ball = Matter.Bodies.circle(WIDTH / 2, HEIGHT / 2, 18, {
-      restitution: 1,
-      friction: 0,
-      frictionAir: friction,
-      label: "ball",
-    });
+    const ball = Matter.Bodies.circle(
+      WIDTH / 2,
+      HEIGHT / 2,
+      makeCollisionRadius(),
+      {
+        restitution: 1,
+        friction: 0,
+        frictionAir: friction,
+        label: "ball",
+      },
+    );
     (ball as any).isWaiting = true;
+    (ball as any).visualRadius = 18;
+    (ball as any).usePointStyle = pointCollision;
     Matter.Composite.add(engineRef.current.world, ball);
     bodiesRef.current = [...bodiesRef.current, ball];
     forceUpdate((n) => n + 1);
@@ -117,16 +138,30 @@ export function SimulatorCanvas({ sides, friction }: SimulatorCanvasProps) {
 
     bodiesRef.current.forEach((body, i) => {
       const hue = (i * 55) % 360;
-      const isStatic = body.isStatic;
-      p5.noStroke();
-      p5.fill(hue, isStatic ? 40 : 75, isStatic ? 70 : 95);
-      p5.circle(body.position.x, body.position.y, body.circleRadius * 2);
+      const isWaiting = (body as any).isWaiting;
+      const r = (body as any).visualRadius ?? body.circleRadius;
+      const usePointStyle = (body as any).usePointStyle;
 
-      if (isStatic && !dragState) {
+      if (usePointStyle) {
+        p5.stroke(hue, 75, 95);
+        p5.strokeWeight(2);
+        p5.fill(hue, 30, 20, 15);
+        p5.circle(body.position.x, body.position.y, r * 2);
+
+        p5.noStroke();
+        p5.fill(hue, 90, 100);
+        p5.circle(body.position.x, body.position.y, 6);
+      } else {
+        p5.noStroke();
+        p5.fill(hue, isWaiting ? 40 : 75, isWaiting ? 70 : 95);
+        p5.circle(body.position.x, body.position.y, r * 2);
+      }
+
+      if (isWaiting && !dragState) {
         p5.stroke(hue, 60, 100);
         p5.strokeWeight(1.5);
         p5.noFill();
-        p5.circle(body.position.x, body.position.y, body.circleRadius * 2 + 10);
+        p5.circle(body.position.x, body.position.y, r * 2 + 10);
       }
     });
   };
