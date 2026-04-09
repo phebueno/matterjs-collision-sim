@@ -1,6 +1,6 @@
 import Sketch from "react-p5";
 import Matter from "matter-js";
-import { useMatterEngine } from "./useMatterEngine";
+import { useMatterEngine } from "../hooks/useMatterEngine";
 
 const WIDTH = 600;
 const HEIGHT = 400;
