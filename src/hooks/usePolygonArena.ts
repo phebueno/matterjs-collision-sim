@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import Matter from "matter-js";
 
 export function usePolygonArena(
@@ -6,7 +6,9 @@ export function usePolygonArena(
   sides: number,
   width: number,
   height: number,
-): void {
+): RefObject<{ x: number; y: number; }[]> {
+  const vertsRef = useRef<{ x: number; y: number }[]>([]);
+
   useEffect(() => {
     if (!engine) return;
 
@@ -35,7 +37,7 @@ export function usePolygonArena(
       const angle = Math.atan2(y2 - y1, x2 - x1);
 
       walls.push(
-        Bodies.rectangle(mx, my, len, 20, {
+        Bodies.rectangle(mx, my, len, 8, {
           isStatic: true,
           angle,
           restitution: 1,
@@ -47,6 +49,18 @@ export function usePolygonArena(
       );
     }
 
+    const verts = [];
+    for (let i = 0; i < sides; i++) {
+      const a = (i / sides) * Math.PI * 2 - Math.PI / 2;
+      verts.push({
+        x: cx + radius * Math.cos(a),
+        y: cy + radius * Math.sin(a),
+      });
+    }
+    vertsRef.current = verts;
+
     Composite.add(engine.world, walls);
   }, [engine, sides, width, height]);
+
+  return vertsRef;
 }

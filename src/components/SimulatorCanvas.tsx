@@ -95,7 +95,12 @@ export const SimulatorCanvas = forwardRef<
     });
   }, [friction]);
 
-  usePolygonArena(engineReady ? engineRef.current : null, sides, WIDTH, HEIGHT);
+  const arenaVertsRef = usePolygonArena(
+    engineReady ? engineRef.current : null,
+    sides,
+    WIDTH,
+    HEIGHT,
+  );
 
   const { dragState, onMouseDown, onMouseDrag, onMouseRelease } =
     useSlingshot(bodiesRef);
@@ -138,18 +143,15 @@ export const SimulatorCanvas = forwardRef<
       }
     });
 
-    const walls = Matter.Composite.allBodies(engineRef.current.world).filter(
-      (b) => b.label === "wall",
-    );
-
-    p5.fill(180, 60, 70);
-    p5.noStroke();
-    walls.forEach((wall) => {
-      const verts = wall.vertices;
+    const arenaVerts = arenaVertsRef.current;
+    if (arenaVerts.length > 0) {
+      p5.stroke(180, 60, 70);
+      p5.strokeWeight(8);
+      p5.noFill();
       p5.beginShape();
-      verts.forEach((v) => p5.vertex(v.x, v.y));
+      arenaVerts.forEach((v) => p5.vertex(v.x, v.y));
       p5.endShape(p5.CLOSE);
-    });
+    }
 
     if (dragState) {
       p5.stroke(60, 80, 90);
@@ -173,8 +175,8 @@ export const SimulatorCanvas = forwardRef<
         p5.fill(hue, 30, 20, 15);
         p5.circle(body.position.x, body.position.y, r * 2);
 
-        p5.noStroke();
         p5.fill(hue, 90, 100);
+        p5.noStroke();
         p5.circle(body.position.x, body.position.y, 6);
       } else {
         p5.noStroke();
@@ -190,6 +192,7 @@ export const SimulatorCanvas = forwardRef<
       }
     });
   };
+
   return (
     <div style={{ width: "600px", flexShrink: 0 }}>
       <Sketch

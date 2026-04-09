@@ -6,7 +6,7 @@ import {
 import { Controls } from "./components/Controls";
 
 export default function App() {
-  const [sides, setSides] = useState<number>(6);
+  const [sides, setSides] = useState<number>(5);
   const [friction, setFriction] = useState<number>(0.008);
   const [pointCollision, setPointCollision] = useState<boolean>(false);
   const simulatorRef = useRef<SimulatorCanvasHandle>(null);
