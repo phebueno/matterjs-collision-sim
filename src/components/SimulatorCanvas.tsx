@@ -31,6 +31,7 @@ export const SimulatorCanvas = forwardRef<
   const engineRef = useRef<Matter.Engine | null>(null);
   const bodiesRef = useRef<Matter.Body[]>([]);
   const [, forceUpdate] = useState<number>(0);
+  const [engineReady, setEngineReady] = useState(false);
   const makeCollisionRadius = () => (pointCollision ? 4 : 18);
 
   useImperativeHandle(ref, () => ({
@@ -77,6 +78,8 @@ export const SimulatorCanvas = forwardRef<
     Matter.Composite.add(engine.world, ball);
     bodiesRef.current = [ball];
 
+    setEngineReady(true);
+
     return () => {
       Matter.Runner.stop(runner);
       Matter.Engine.clear(engine);
@@ -92,7 +95,7 @@ export const SimulatorCanvas = forwardRef<
     });
   }, [friction]);
 
-  usePolygonArena(engineRef.current, sides, WIDTH, HEIGHT);
+  usePolygonArena(engineReady ? engineRef.current : null, sides, WIDTH, HEIGHT);
 
   const { dragState, onMouseDown, onMouseDrag, onMouseRelease } =
     useSlingshot(bodiesRef);
