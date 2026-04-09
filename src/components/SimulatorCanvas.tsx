@@ -26,7 +26,16 @@ export function SimulatorCanvas({
   const makeCollisionRadius = () => (pointCollision ? 4 : 18);
 
   useEffect(() => {
-    const engine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
+    const engine = Matter.Engine.create({
+      gravity: { x: 0, y: 0 },
+      positionIterations: 10,
+      velocityIterations: 8,
+    });
+    engine.constraintIterations = 4;
+    (Matter.Resolver as any)._slop = 0;
+    (engine as any).enableSleeping = false;
+    (Matter.Resolver as any)._restingThresh = 0.001;
+    (Matter.Resolver as any)._restingThreshTangent = 0.001;
     engineRef.current = engine;
     const runner = Matter.Runner.create();
     Matter.Runner.run(runner, engine);
@@ -47,6 +56,7 @@ export function SimulatorCanvas({
         restitution: 1,
         friction: 0,
         frictionAir: 0,
+        slop: 0,
         label: "ball",
       },
     );

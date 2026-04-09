@@ -41,6 +41,7 @@ export function usePolygonArena(
           restitution: 1,
           friction: 0,
           frictionStatic: 0,
+          slop: 0,
           label: "wall",
         }),
       );
