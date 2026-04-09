@@ -24,6 +24,14 @@ export function SimulatorCanvas({ sides, friction }: SimulatorCanvasProps) {
     const runner = Matter.Runner.create();
     Matter.Runner.run(runner, engine);
 
+    Matter.Events.on(engine, "collisionStart", (event) => {
+      event.pairs.forEach((pair) => {
+        const { bodyA, bodyB } = pair;
+        if ((bodyA as any).isWaiting) (bodyA as any).isWaiting = false;
+        if ((bodyB as any).isWaiting) (bodyB as any).isWaiting = false;
+      });
+    });
+
     const ball = Matter.Bodies.circle(WIDTH / 2, HEIGHT / 2, 18, {
       restitution: 1,
       friction: 0,
