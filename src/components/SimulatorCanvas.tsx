@@ -1,6 +1,12 @@
 import Sketch from "react-p5";
 import Matter from "matter-js";
-import { useRef, useEffect, useState } from "react";
+import {
+  useRef,
+  useEffect,
+  useState,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
 import { usePolygonArena } from "../hooks/usePolygonArena";
 import { useSlingshot } from "../hooks/useSlingshot";
 import type p5Types from "p5";
@@ -8,22 +14,28 @@ import type p5Types from "p5";
 const WIDTH = 600;
 const HEIGHT = 600;
 
+export interface SimulatorCanvasHandle {
+  addBall: () => void;
+}
+
 interface SimulatorCanvasProps {
   sides: number;
   friction: number;
   pointCollision: boolean;
 }
 
-export function SimulatorCanvas({
-  sides,
-  friction,
-  pointCollision,
-}: SimulatorCanvasProps) {
+export const SimulatorCanvas = forwardRef<
+  SimulatorCanvasHandle,
+  SimulatorCanvasProps
+>(({ sides, friction, pointCollision }, ref): React.ReactElement => {
   const engineRef = useRef<Matter.Engine | null>(null);
   const bodiesRef = useRef<Matter.Body[]>([]);
   const [, forceUpdate] = useState<number>(0);
-
   const makeCollisionRadius = () => (pointCollision ? 4 : 18);
+
+  useImperativeHandle(ref, () => ({
+    addBall,
+  }));
 
   useEffect(() => {
     const engine = Matter.Engine.create({
@@ -175,16 +187,8 @@ export function SimulatorCanvas({
       }
     });
   };
-
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "1rem",
-      }}
-    >
+    <div style={{ width: "600px", flexShrink: 0 }}>
       <Sketch
         setup={setup}
         draw={draw}
@@ -192,12 +196,6 @@ export function SimulatorCanvas({
         mouseDragged={onMouseDrag}
         mouseReleased={onMouseRelease}
       />
-      <button
-        onClick={addBall}
-        style={{ padding: "8px 24px", borderRadius: "6px", cursor: "pointer" }}
-      >
-        + Adicionar bola
-      </button>
     </div>
   );
-}
+});

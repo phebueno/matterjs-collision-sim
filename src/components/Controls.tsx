@@ -5,6 +5,7 @@ interface ControlsProps {
   setFriction: (value: number) => void;
   pointCollision: boolean;
   setPointCollision: (value: boolean) => void;
+  onAddBall: () => void;
 }
 
 export function Controls({
@@ -14,17 +15,15 @@ export function Controls({
   setFriction,
   pointCollision,
   setPointCollision,
+  onAddBall,
 }: ControlsProps) {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "1rem",
-        minWidth: 200,
-      }}
-    >
-      <label>
+    <div className="controls">
+      <button className="controls-button" onClick={onAddBall}>
+        + Adicionar bola
+      </button>
+
+      <label className="controls-label">
         Lados do polígono: <strong>{sides}</strong>
         <input
           type="range"
@@ -32,11 +31,10 @@ export function Controls({
           max="12"
           value={sides}
           onChange={(e) => setSides(Number(e.target.value))}
-          style={{ width: "100%" }}
         />
       </label>
 
-      <label>
+      <label className="controls-label">
         Fricção: <strong>{friction.toFixed(3)}</strong>
         <input
           type="range"
@@ -45,18 +43,10 @@ export function Controls({
           step="0.001"
           value={friction}
           onChange={(e) => setFriction(Number(e.target.value))}
-          style={{ width: "100%" }}
         />
       </label>
 
-      <label
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          cursor: "pointer",
-        }}
-      >
+      <label className="controls-checkbox">
         <input
           type="checkbox"
           checked={pointCollision}
