@@ -8,7 +8,11 @@ export function useMatterEngine(width: number, height: number) {
   const bodiesRef = useRef<Matter.Body[]>([]);
 
   useEffect(() => {
-    const engine = Engine.create({ gravity: { y: 0.5 } });
+    const engine = Matter.Engine.create({
+      gravity: { x: 0, y: 0 },
+      positionIterations: 10,
+      velocityIterations: 8,
+    });
     engineRef.current = engine;
 
     const walls = [
