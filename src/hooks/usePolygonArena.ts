@@ -1,40 +1,61 @@
-import { useEffect, useRef, type RefObject } from "react";
-import Matter from "matter-js";
+import { useEffect, useRef } from 'react'
+import Matter from 'matter-js'
+
+interface Vertex {
+  x: number
+  y: number
+}
 
 export function usePolygonArena(
   engine: Matter.Engine | null,
   sides: number,
   width: number,
   height: number,
-): RefObject<{ x: number; y: number; }[]> {
-  const vertsRef = useRef<{ x: number; y: number }[]>([]);
+  vertexValues: number[]
+) {
+  const outerVertsRef = useRef<Vertex[]>([])
+  const innerVertsRef = useRef<Vertex[]>([])
 
   useEffect(() => {
-    if (!engine) return;
+    if (!engine) return
 
-    const { Bodies, Composite } = Matter;
-    const cx = width / 2;
-    const cy = height / 2;
-    const radius = Math.min(width, height) * 0.42;
+    const { Bodies, Composite } = Matter
+    const cx = width / 2
+    const cy = height / 2
+    const radius = Math.min(width, height) * 0.42
 
     const old = Composite.allBodies(engine.world).filter(
-      (b) => b.isStatic && b.label === "wall",
-    );
-    Composite.remove(engine.world, old);
+      (b) => b.isStatic && b.label === 'wall'
+    )
+    Composite.remove(engine.world, old)
 
-    const walls = [];
+    const outerVerts: Vertex[] = []
     for (let i = 0; i < sides; i++) {
-      const a1 = (i / sides) * Math.PI * 2 - Math.PI / 2;
-      const a2 = ((i + 1) / sides) * Math.PI * 2 - Math.PI / 2;
-      const x1 = cx + radius * Math.cos(a1);
-      const y1 = cy + radius * Math.sin(a1);
-      const x2 = cx + radius * Math.cos(a2);
-      const y2 = cy + radius * Math.sin(a2);
+      const a = (i / sides) * Math.PI * 2 - Math.PI / 2
+      outerVerts.push({ x: cx + radius * Math.cos(a), y: cy + radius * Math.sin(a) })
+    }
+    outerVertsRef.current = outerVerts
 
-      const mx = (x1 + x2) / 2;
-      const my = (y1 + y2) / 2;
-      const len = Math.hypot(x2 - x1, y2 - y1);
-      const angle = Math.atan2(y2 - y1, x2 - x1);
+    const innerVerts: Vertex[] = outerVerts.map((v, i) => {
+      const t = (vertexValues[i] ?? 10) / 10
+      return {
+        x: cx + (v.x - cx) * t,
+        y: cy + (v.y - cy) * t,
+      }
+    })
+    innerVertsRef.current = innerVerts
+
+    const walls: Matter.Body[] = []
+    for (let i = 0; i < sides; i++) {
+      const v1 = innerVerts[i]
+      const v2 = innerVerts[(i + 1) % sides]
+
+      const mx = (v1.x + v2.x) / 2
+      const my = (v1.y + v2.y) / 2
+      const len = Math.hypot(v2.x - v1.x, v2.y - v1.y)
+      const angle = Math.atan2(v2.y - v1.y, v2.x - v1.x)
+
+      if (len < 1) return
 
       walls.push(
         Bodies.rectangle(mx, my, len, 8, {
@@ -44,23 +65,13 @@ export function usePolygonArena(
           friction: 0,
           frictionStatic: 0,
           slop: 0,
-          label: "wall",
-        }),
-      );
+          label: 'wall',
+        })
+      )
     }
 
-    const verts = [];
-    for (let i = 0; i < sides; i++) {
-      const a = (i / sides) * Math.PI * 2 - Math.PI / 2;
-      verts.push({
-        x: cx + radius * Math.cos(a),
-        y: cy + radius * Math.sin(a),
-      });
-    }
-    vertsRef.current = verts;
+    Composite.add(engine.world, walls)
+  }, [engine, sides, width, height, vertexValues])
 
-    Composite.add(engine.world, walls);
-  }, [engine, sides, width, height]);
-
-  return vertsRef;
+  return { outerVertsRef, innerVertsRef }
 }

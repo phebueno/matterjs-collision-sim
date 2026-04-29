@@ -6,6 +6,10 @@ interface ControlsProps {
   pointCollision: boolean;
   setPointCollision: (value: boolean) => void;
   onAddBall: () => void;
+  editMode: boolean;
+  setEditMode: (value: boolean) => void;
+  vertexValues: number[];
+  setVertexValues: (value: number[]) => void;
 }
 
 export function Controls({
@@ -16,6 +20,10 @@ export function Controls({
   pointCollision,
   setPointCollision,
   onAddBall,
+  editMode,
+  setEditMode,
+  vertexValues,
+  setVertexValues,
 }: ControlsProps) {
   return (
     <div className="controls">
@@ -54,6 +62,31 @@ export function Controls({
         />
         Colisão pelo centro
       </label>
+
+      <button
+        className={`controls-button ${editMode ? "controls-button--active" : ""}`}
+        onClick={() => setEditMode(!editMode)}
+      >
+        {editMode ? "✓ Editando forma" : "Editar forma"}
+      </button>
+
+      {editMode &&
+        vertexValues.map((val, i) => (
+          <label key={i} className="controls-label">
+            Vértice {i + 1}: <strong>{val}</strong>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              value={val}
+              onChange={(e) => {
+                const next = [...vertexValues];
+                next[i] = Number(e.target.value);
+                setVertexValues(next);
+              }}
+            />
+          </label>
+        ))}
     </div>
   );
 }
