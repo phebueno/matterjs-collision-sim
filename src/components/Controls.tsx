@@ -30,94 +30,146 @@ export function Controls({
   onResetBalls,
 }: ControlsProps) {
   return (
-    <div className="controls">
-      <button className="controls-button" onClick={onAddBall}>
-        + Adicionar bola
-      </button>
+    <div className="flex flex-col gap-4 w-56 font-mono">
+      <div className="flex flex-col gap-2 border-b border-crt-border pb-4">
+        <span className="text-[10px] tracking-[0.2em] text-crt-dim uppercase">
+          Ações
+        </span>
+        {[
+          { label: "+ Adicionar bola", fn: onAddBall },
+          { label: "⟳ Resetar bolas", fn: onResetBalls },
+          { label: "▸ Lançar aleatório", fn: onLaunchRandom },
+        ].map(({ label, fn }) => (
+          <button
+            key={label}
+            onClick={fn}
+            className="w-full text-left text-sm px-3 py-1.5
+                       border border-crt-border
+                       text-crt-primary
+                       hover:bg-crt-border
+                       hover:shadow-[0_0_8px_rgba(0,229,204,0.3)]
+                       transition-all duration-150 uppercase tracking-wider"
+          >
+            {label}
+          </button>
+        ))}
+      </div>
 
-      <label className="controls-label">
-        Lados do polígono: <strong>{sides}</strong>
-        <input
-          type="range"
-          min="3"
-          max="12"
-          value={sides}
-          onChange={(e) => setSides(Number(e.target.value))}
-        />
-      </label>
+      <div className="flex flex-col gap-4 border-b border-crt-border pb-4">
+        <span className="text-[10px] tracking-[0.2em] text-crt-dim uppercase">
+          Parâmetros
+        </span>
 
-      <label className="controls-label">
-        Fricção: <strong>{friction.toFixed(3)}</strong>
-        <input
-          type="range"
-          min="0"
-          max="3"
-          step="0.01"
-          value={friction}
-          onChange={(e) => setFriction(Number(e.target.value))}
-        />
-      </label>
+        {[
+          {
+            label: "Lados",
+            value: sides,
+            min: 3,
+            max: 12,
+            step: 1,
+            set: setSides,
+          },
+          {
+            label: "Fricção",
+            value: friction,
+            min: 0,
+            max: 3,
+            step: 0.1,
+            set: setFriction,
+          },
+        ].map(({ label, value, min, max, step, set }) => (
+          <div key={label} className="flex flex-col gap-1">
+            <div className="flex justify-between text-xs">
+              <span className="text-crt-dim uppercase tracking-wider">
+                {label}
+              </span>
+              <span className="text-crt-amber">
+                {typeof value === "number" && !Number.isInteger(value)
+                  ? value.toFixed(1)
+                  : value}
+              </span>
+            </div>
+            <input
+              type="range"
+              min={min}
+              max={max}
+              step={step}
+              value={value}
+              onChange={(e) => set(Number(e.target.value))}
+              className="w-full accent-crt-primary cursor-pointer"
+            />
+          </div>
+        ))}
+      </div>
 
-      <label className="controls-checkbox">
+      <label className="flex items-center gap-2 text-xs uppercase tracking-wider cursor-pointer text-crt-dim hover:text-crt-primary transition-colors">
         <input
           type="checkbox"
           checked={pointCollision}
           onChange={(e) => setPointCollision(e.target.checked)}
+          className="accent-crt-primary"
         />
         Colisão pelo centro
       </label>
 
-      <button
-        className={`controls-button ${editMode ? "controls-button--active" : ""}`}
-        onClick={() => setEditMode(!editMode)}
-      >
-        {editMode ? "✓ Editando forma" : "Editar forma"}
-      </button>
+      <div className="flex flex-col gap-3 border-t border-crt-border pt-4">
+        <button
+          onClick={() => setEditMode(!editMode)}
+          className={`w-full text-left text-sm px-3 py-1.5 border uppercase tracking-wider transition-all duration-150
+            ${
+              editMode
+                ? "border-crt-primary text-crt-bg bg-crt-primary"
+                : "border-crt-border text-crt-primary hover:bg-crt-border"
+            }`}
+        >
+          {editMode ? "✓ Editando forma" : "⬡ Editar forma"}
+        </button>
 
-      <button className="controls-button" onClick={onResetBalls}>
-        Resetar bolas
-      </button>
-      <button className="controls-button" onClick={onLaunchRandom}>
-        Lançar aleatório
-      </button>
-
-      {editMode &&
-        vertexValues.map((val, i) => (
-          <div key={i} className="controls-vertex">
-            <span className="controls-label-text">V{i + 1}</span>
-            <div className="controls-vertex-input">
-              <button
-                onClick={() => {
-                  const next = [...vertexValues];
-                  next[i] = Math.max(0, val - 1);
-                  setVertexValues(next);
-                }}
-              >
-                −
-              </button>
-              <input
-                type="number"
-                min="0"
-                max="10"
-                value={val}
-                onChange={(e) => {
-                  const next = [...vertexValues];
-                  next[i] = Math.max(0, Math.min(10, Number(e.target.value)));
-                  setVertexValues(next);
-                }}
-              />
-              <button
-                onClick={() => {
-                  const next = [...vertexValues];
-                  next[i] = Math.min(10, val + 1);
-                  setVertexValues(next);
-                }}
-              >
-                +
-              </button>
+        {editMode &&
+          vertexValues.map((val, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between gap-2 text-xs"
+            >
+              <span className="text-crt-dim uppercase w-6">V{i + 1}</span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => {
+                    const n = [...vertexValues];
+                    n[i] = Math.max(0, val - 1);
+                    setVertexValues(n);
+                  }}
+                  className="w-6 h-6 border border-crt-border text-crt-primary hover:bg-crt-border transition-colors"
+                >
+                  −
+                </button>
+                <input
+                  type="number"
+                  min={0}
+                  max={10}
+                  value={val}
+                  onChange={(e) => {
+                    const n = [...vertexValues];
+                    n[i] = Math.max(0, Math.min(10, Number(e.target.value)));
+                    setVertexValues(n);
+                  }}
+                  className="w-10 text-center bg-transparent border border-crt-border text-crt-amber text-xs py-0.5
+                           [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <button
+                  onClick={() => {
+                    const n = [...vertexValues];
+                    n[i] = Math.min(10, val + 1);
+                    setVertexValues(n);
+                  }}
+                  className="w-6 h-6 border border-crt-border text-crt-primary hover:bg-crt-border transition-colors"
+                >
+                  +
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+      </div>
     </div>
   );
 }

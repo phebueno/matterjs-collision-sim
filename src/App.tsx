@@ -19,18 +19,29 @@ export default function App() {
   };
 
   return (
-    <main className="app">
-      <h1 className="app-title">Simulador de Colisões</h1>
-      <div className="app-content">
-        <SimulatorCanvas
-          ref={simulatorRef}
-          sides={sides}
-          friction={friction}
-          pointCollision={pointCollision}
-          editMode={editMode}
-          vertexValues={vertexValues}
-          setVertexValues={setVertexValues}
-        />
+    <main className="min-h-screen w-full flex flex-col items-center justify-center p-8 gap-6">
+      <h1 className="font-mono text-crt-primary text-2xl tracking-[0.3em] uppercase border-b border-crt-border pb-3 w-full text-center">
+        ▸ Simulador de Colisões
+      </h1>
+
+      <div className="flex flex-row gap-6 items-center">
+        <div
+          className="relative border-2 border-crt-border p-1 
+                        shadow-[0_0_20px_rgba(0,229,204,0.15)] 
+                        before:content-[''] before:absolute before:inset-0 
+                        before:border before:border-crt-dim before:pointer-events-none"
+        >
+          <SimulatorCanvas
+            ref={simulatorRef}
+            sides={sides}
+            friction={friction}
+            pointCollision={pointCollision}
+            editMode={editMode}
+            vertexValues={vertexValues}
+            setVertexValues={setVertexValues}
+          />
+        </div>
+
         <Controls
           sides={sides}
           setSides={handleSetSides}
