@@ -125,50 +125,52 @@ export function Controls({
           {editMode ? "✓ Editando forma" : "⬡ Editar forma"}
         </button>
 
-        {editMode &&
-          vertexValues.map((val, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between gap-2 text-xs"
-            >
-              <span className="text-crt-dim uppercase w-6">V{i + 1}</span>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => {
-                    const n = [...vertexValues];
-                    n[i] = Math.max(0, val - 1);
-                    setVertexValues(n);
-                  }}
-                  className="w-6 h-6 border border-crt-border text-crt-primary hover:bg-crt-border transition-colors"
-                >
-                  −
-                </button>
-                <input
-                  type="number"
-                  min={0}
-                  max={10}
-                  value={val}
-                  onChange={(e) => {
-                    const n = [...vertexValues];
-                    n[i] = Math.max(0, Math.min(10, Number(e.target.value)));
-                    setVertexValues(n);
-                  }}
-                  className="w-10 text-center bg-transparent border border-crt-border text-crt-amber text-xs py-0.5
-                           [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
-                <button
-                  onClick={() => {
-                    const n = [...vertexValues];
-                    n[i] = Math.min(10, val + 1);
-                    setVertexValues(n);
-                  }}
-                  className="w-6 h-6 border border-crt-border text-crt-primary hover:bg-crt-border transition-colors"
-                >
-                  +
-                </button>
+        {editMode && (
+          <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+            {vertexValues.map((val, i) => (
+              <div key={i} className="flex flex-col gap-1">
+                <span className="text-crt-dim uppercase text-[10px] tracking-wider">
+                  V{i + 1}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => {
+                      const n = [...vertexValues];
+                      n[i] = Math.max(0, val - 1);
+                      setVertexValues(n);
+                    }}
+                    className="w-5 h-5 border border-crt-border text-crt-primary hover:bg-crt-border transition-colors text-xs"
+                  >
+                    −
+                  </button>
+                  <input
+                    type="number"
+                    min={0}
+                    max={10}
+                    value={val}
+                    onChange={(e) => {
+                      const n = [...vertexValues];
+                      n[i] = Math.max(0, Math.min(10, Number(e.target.value)));
+                      setVertexValues(n);
+                    }}
+                    className="w-8 text-center bg-transparent border border-crt-border text-crt-amber text-xs py-0.5
+                       [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                  <button
+                    onClick={() => {
+                      const n = [...vertexValues];
+                      n[i] = Math.min(10, val + 1);
+                      setVertexValues(n);
+                    }}
+                    className="w-5 h-5 border border-crt-border text-crt-primary hover:bg-crt-border transition-colors text-xs"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

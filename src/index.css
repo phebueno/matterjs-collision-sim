@@ -47,3 +47,29 @@ body::before {
   pointer-events: none;
   z-index: 9998;
 }
+
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a1520; /* teu bg */
+  border-left: 1px solid #1a4a4a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00e5cc;
+  border: 1px solid #1a4a4a;
+  box-shadow: 0 0 6px rgba(0, 229, 204, 0.5);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00fff0;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #00e5cc #0a1520;
+}
