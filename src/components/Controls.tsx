@@ -10,6 +10,8 @@ interface ControlsProps {
   setEditMode: (value: boolean) => void;
   vertexValues: number[];
   setVertexValues: (value: number[]) => void;
+  onResetBalls: () => void;
+  onLaunchRandom: () => void;
 }
 
 export function Controls({
@@ -24,6 +26,8 @@ export function Controls({
   setEditMode,
   vertexValues,
   setVertexValues,
+  onLaunchRandom,
+  onResetBalls,
 }: ControlsProps) {
   return (
     <div className="controls">
@@ -47,8 +51,8 @@ export function Controls({
         <input
           type="range"
           min="0"
-          max="0.05"
-          step="0.001"
+          max="3"
+          step="0.01"
           value={friction}
           onChange={(e) => setFriction(Number(e.target.value))}
         />
@@ -70,22 +74,49 @@ export function Controls({
         {editMode ? "✓ Editando forma" : "Editar forma"}
       </button>
 
+      <button className="controls-button" onClick={onResetBalls}>
+        Resetar bolas
+      </button>
+      <button className="controls-button" onClick={onLaunchRandom}>
+        Lançar aleatório
+      </button>
+
       {editMode &&
         vertexValues.map((val, i) => (
-          <label key={i} className="controls-label">
-            Vértice {i + 1}: <strong>{val}</strong>
-            <input
-              type="range"
-              min="0"
-              max="10"
-              value={val}
-              onChange={(e) => {
-                const next = [...vertexValues];
-                next[i] = Number(e.target.value);
-                setVertexValues(next);
-              }}
-            />
-          </label>
+          <div key={i} className="controls-vertex">
+            <span className="controls-label-text">V{i + 1}</span>
+            <div className="controls-vertex-input">
+              <button
+                onClick={() => {
+                  const next = [...vertexValues];
+                  next[i] = Math.max(0, val - 1);
+                  setVertexValues(next);
+                }}
+              >
+                −
+              </button>
+              <input
+                type="number"
+                min="0"
+                max="10"
+                value={val}
+                onChange={(e) => {
+                  const next = [...vertexValues];
+                  next[i] = Math.max(0, Math.min(10, Number(e.target.value)));
+                  setVertexValues(next);
+                }}
+              />
+              <button
+                onClick={() => {
+                  const next = [...vertexValues];
+                  next[i] = Math.min(10, val + 1);
+                  setVertexValues(next);
+                }}
+              >
+                +
+              </button>
+            </div>
+          </div>
         ))}
     </div>
   );

@@ -7,7 +7,7 @@ import { Controls } from "./components/Controls";
 
 export default function App() {
   const [sides, setSides] = useState<number>(5);
-  const [friction, setFriction] = useState<number>(0.008);
+  const [friction, setFriction] = useState<number>(0.1);
   const [pointCollision, setPointCollision] = useState<boolean>(false);
   const [editMode, setEditMode] = useState(false);
   const [vertexValues, setVertexValues] = useState<number[]>(Array(6).fill(10));
@@ -39,6 +39,8 @@ export default function App() {
           pointCollision={pointCollision}
           setPointCollision={setPointCollision}
           onAddBall={() => simulatorRef.current?.addBall()}
+          onResetBalls={() => simulatorRef.current?.resetBalls()}
+          onLaunchRandom={() => simulatorRef.current?.launchRandom()}
           editMode={editMode}
           setEditMode={setEditMode}
           vertexValues={vertexValues}

@@ -58,7 +58,7 @@ export function usePolygonArena(
       if (len < 1) return
 
       walls.push(
-        Bodies.rectangle(mx, my, len, 8, {
+        Bodies.rectangle(mx, my, len, 20, {
           isStatic: true,
           angle,
           restitution: 1,

@@ -16,6 +16,8 @@ const HEIGHT = 600;
 
 export interface SimulatorCanvasHandle {
   addBall: () => void;
+  resetBalls: () => void;
+  launchRandom: () => void;
 }
 
 interface SimulatorCanvasProps {
@@ -48,16 +50,23 @@ export const SimulatorCanvas = forwardRef<
     const [engineReady, setEngineReady] = useState(false);
     const dragVertexRef = useRef<number | null>(null);
     const makeCollisionRadius = () => (pointCollision ? 4 : 18);
+    const frictionRef = useRef(friction);
 
     useImperativeHandle(ref, () => ({
       addBall,
+      launchRandom,
+      resetBalls,
     }));
+
+    useEffect(() => {
+      frictionRef.current = friction;
+    }, [friction]);
 
     useEffect(() => {
       const engine = Matter.Engine.create({
         gravity: { x: 0, y: 0 },
-        positionIterations: 10,
-        velocityIterations: 8,
+        positionIterations: 20,
+        velocityIterations: 16,
       });
       engine.constraintIterations = 4;
       (Matter.Resolver as any)._slop = 0;
@@ -73,6 +82,27 @@ export const SimulatorCanvas = forwardRef<
           const { bodyA, bodyB } = pair;
           if ((bodyA as any).isWaiting) (bodyA as any).isWaiting = false;
           if ((bodyB as any).isWaiting) (bodyB as any).isWaiting = false;
+        });
+      });
+
+      Matter.Events.on(engine, "beforeUpdate", () => {
+        bodiesRef.current.forEach((ball) => {
+          if ((ball as any).isWaiting) return;
+
+          const vel = ball.velocity;
+          const speed = Matter.Body.getSpeed(ball);
+
+          if (speed < 0.2) {
+            Matter.Body.setVelocity(ball, { x: 0, y: 0 });
+            return;
+          }
+
+          const drag = frictionRef.current / speed;
+          const factor = Math.max(0, 1 - drag);
+          Matter.Body.setVelocity(ball, {
+            x: vel.x * factor,
+            y: vel.y * factor,
+          });
         });
       });
 
@@ -103,12 +133,6 @@ export const SimulatorCanvas = forwardRef<
         bodiesRef.current = [];
       };
     }, []);
-
-    useEffect(() => {
-      bodiesRef.current.forEach((b) => {
-        b.frictionAir = friction;
-      });
-    }, [friction]);
 
     const { outerVertsRef, innerVertsRef } = usePolygonArena(
       engineReady ? engineRef.current : null,
@@ -171,7 +195,7 @@ export const SimulatorCanvas = forwardRef<
         {
           restitution: 1,
           friction: 0,
-          frictionAir: friction,
+          frictionAir: 0,
           label: "ball",
         },
       );
@@ -181,6 +205,45 @@ export const SimulatorCanvas = forwardRef<
       Matter.Composite.add(engineRef.current.world, ball);
       bodiesRef.current = [...bodiesRef.current, ball];
       forceUpdate((n) => n + 1);
+    };
+
+    const resetBalls = () => {
+      if (!engineRef.current) return;
+      const balls = Matter.Composite.allBodies(engineRef.current.world).filter(
+        (b) => b.label === "ball",
+      );
+      Matter.Composite.remove(engineRef.current.world, balls);
+
+      const ball = Matter.Bodies.circle(
+        WIDTH / 2,
+        HEIGHT / 2,
+        makeCollisionRadius(),
+        {
+          restitution: 1,
+          friction: 0,
+          frictionAir: 0,
+          slop: 0,
+          label: "ball",
+        },
+      );
+      (ball as any).visualRadius = 18;
+      (ball as any).usePointStyle = pointCollision;
+      Matter.Composite.add(engineRef.current.world, ball);
+      bodiesRef.current = [ball];
+      forceUpdate((n) => n + 1);
+    };
+
+    const launchRandom = () => {
+      const speed = 25;
+
+      bodiesRef.current.forEach((ball) => {
+        (ball as any).isWaiting = false;
+        const angle = Math.random() * Math.PI * 2;
+        Matter.Body.setVelocity(ball, {
+          x: Math.cos(angle) * speed,
+          y: Math.sin(angle) * speed,
+        });
+      });
     };
 
     const setup = (p5: p5Types, parent: Element) => {
